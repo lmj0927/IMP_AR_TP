@@ -23,7 +23,7 @@ MonoBehaviour:
     m_SerializedTextureGuid:
       m_GuidLow: 14687405247885005717
       m_GuidHigh: 13455281606627710826
-    m_Size: {x: 0, y: 0}
-    m_SpecifySize: 0
+    m_Size: {x: 0.1, y: 0.19166666}
+    m_SpecifySize: 1
     m_Name: Tracker
     m_Texture: {fileID: 0}

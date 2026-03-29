@@ -11,13 +11,15 @@ public class BatterySpawner : MonoBehaviour
     [SerializeField] private float spawnY = 0.1f;
     [SerializeField] private float checkRadius = 0.5f;
 
-    void Start()
-    {
-        SpawnBatteries();
-    }
+    private bool hasSpawned = false;
 
-    private void SpawnBatteries()
+    public void SpawnBatteries()
     {
+        if (hasSpawned)
+            return;
+
+        hasSpawned = true;
+
         int currentCount = 0;
         int tryCount = 0;
 
@@ -55,6 +57,5 @@ public class BatterySpawner : MonoBehaviour
         }
 
         Debug.Log("생성된 배터리 수 : " + currentCount);
-        Debug.Log("총 시도 횟수 : " + tryCount);
     }
 }
