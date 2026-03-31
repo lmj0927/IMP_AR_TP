@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -13,6 +14,8 @@ public class FilterCamera : MonoBehaviour
     private float leftFilterTime;
     bool isOnFilter = false;
     Camera mainCam;
+
+    Coroutine filterCoroutine;
     
     void Start()
     {
@@ -43,17 +46,33 @@ public class FilterCamera : MonoBehaviour
 
     private void ChangeFilter()
     {
+        if(filterCoroutine != null)
+            StopCoroutine(filterCoroutine);
+        filterCoroutine = StartCoroutine(FilterCoroutine());
+    }
+
+    IEnumerator FilterCoroutine()    
+    {
+        
         if (isOnFilter)
         {
             mainCam.cullingMask &= ~(1 << LayerMask.NameToLayer("Enemy"));
-            filterVolume.weight = 0;
             filterGaugeSlider.gameObject.SetActive(false);
+            while (filterVolume.weight > 0)
+            {
+                filterVolume.weight -= Time.deltaTime * 2;
+                yield return null;
+            }
         }
         else
         {
             mainCam.cullingMask |= 1 << LayerMask.NameToLayer("Enemy");
-            filterVolume.weight = 1;
             filterGaugeSlider.gameObject.SetActive(true);
+            while (filterVolume.weight < 1)
+            {
+                filterVolume.weight += Time.deltaTime * 2;
+                yield return null;
+            }
         }
         isOnFilter = !isOnFilter;
     }
