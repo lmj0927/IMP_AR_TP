@@ -2,43 +2,54 @@ using UnityEngine;
 
 public class BatteryCollector : MonoBehaviour
 {
-    [Header("설정")]
-    [SerializeField] private float collectDistance = 5f;
-    [SerializeField] private LayerMask batteryLayer;
+    [Header("Reference")]
     [SerializeField] private Camera arCamera;
 
-    private void Awake()
-    {
-        if (arCamera == null)
-        {
-            arCamera = Camera.main;
-        }
-    }
+    [Header("Collect Settings")]
+    [SerializeField] private float rayDistance = 20f;
+    [SerializeField] private float collectDistance = 2f;
+    [SerializeField] private LayerMask batteryLayer;
 
     private void Update()
     {
-        if (arCamera == null) return;
-
-        Ray ray = arCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-        Debug.DrawRay(ray.origin, ray.direction * collectDistance, Color.red);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, collectDistance, batteryLayer))
+#if UNITY_EDITOR
+        if (Input.GetMouseButtonDown(0))
         {
-            BatteryItem battery = hit.collider.GetComponentInParent<BatteryItem>();
+            TryCollectBattery();
+        }
+#else
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
 
-            if (battery != null)
+            if (touch.phase == TouchPhase.Began)
             {
-                float distance = Vector3.Distance(ray.origin, hit.point);
-
-                if (distance <= collectDistance)
-                {
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        Debug.Log($"배터리 획득! 거리: {distance:F2}m");
-                        battery.Collect();
-                    }
-                }
+                TryCollectBattery();
             }
         }
+#endif
+    }
+
+    private void TryCollectBattery()
+    {
+        Ray ray = arCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+
+        if (!Physics.Raycast(ray, out RaycastHit hit, rayDistance, batteryLayer))
+            return;
+
+        if (hit.collider.TryGetComponent(out BatteryItem batteryItem))
+        {
+            float distanceToBattery = Vector3.Distance(
+                arCamera.transform.position,
+                batteryItem.transform.position
+            );
+
+            if (distanceToBattery > collectDistance)
+                return;
+
+            Debug.Log("배터리 수집, 필터 시간 증가량: " + batteryItem.FilterTimeAmount);
+            batteryItem.Collect();
+        }
+        
     }
 }

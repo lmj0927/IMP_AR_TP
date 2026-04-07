@@ -1,90 +1,136 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BatterySpawner : MonoBehaviour
 {
+    [Header("Reference")]
+    [SerializeField] private BatteryItem batteryPrefab;
+    [SerializeField] private ARGroundResolver groundResolver;
+
     [Header("Spawn Settings")]
-    [SerializeField] private GameObject batteryPrefab;
-    [SerializeField] private int targetCount = 5;
-    [SerializeField] private int maxTryCount = 30;
+    [SerializeField] private int spawnCount = 5;
+    [SerializeField] private float spawnRadius = 2f;
+    [SerializeField] private float respawnDelay = 5f;
+    [SerializeField] private float spawnHeightOffset = 0.05f;
+    [SerializeField] private float minDistanceBetweenBatteries = 0.7f;
 
-    [Header("Range Settings (Local)")]
-    [SerializeField] private float rangeX = 1.5f;
-    [SerializeField] private float rangeZ = 1.5f;
-    [SerializeField] private float spawnY = 0.05f;
-    [SerializeField] private float checkRadius = 0.2f; // 배터리 크기에 맞춰 조정
+    private readonly List<BatteryItem> spawnedBatteries = new();
+    private readonly Dictionary<BatteryItem, Coroutine> respawnCoroutines = new();
 
-    private bool _isInitialized = false;
+    private Vector3 spawnCenter;
+    private bool hasSpawnedOnce = false;
 
-    public void InitializeSpawning()
+    private void Update()
     {
-        if (_isInitialized) return;
-        _isInitialized = true;
-        
-        StartCoroutine(InitialSpawnRoutine());
-    }
-
-    private IEnumerator InitialSpawnRoutine()
-    {
-        int currentCount = 0;
-        while (currentCount < targetCount)
+        if (!hasSpawnedOnce)
         {
-            if (TryGetValidPosition(out Vector3 localPos))
-            {
-                GameObject battery = Instantiate(batteryPrefab, transform);
-                battery.transform.localPosition = localPos;
-                battery.transform.localRotation = Quaternion.identity;
-                currentCount++;
-            }
-            yield return null; // 프레임 부하 방지
+            TrySpawnAllBatteries();
         }
     }
 
-    public void RequestRespawn(BatteryItem item, float minDelay, float maxDelay)
+    public void TrySpawnAllBatteries()
     {
-        StartCoroutine(RespawnRoutine(item, minDelay, maxDelay));
+        if (!groundResolver.TryResolveGround(out Vector3 groundPosition))
+        {
+            return;
+        }
+
+        spawnCenter = groundPosition;
+        Debug.Log($"<color=cyan>바닥 감지 성공! 좌표: {spawnCenter} 주변에 스폰 시작</color>");
+
+        for (int i = 0; i < spawnCount; i++)
+        {
+            Vector3 spawnPosition = GetValidSpawnPosition();
+
+            BatteryItem battery = Instantiate(
+                batteryPrefab,
+                spawnPosition,
+                Quaternion.identity,
+                transform
+            );
+
+            battery.OnCollected += HandleBatteryCollected;
+            spawnedBatteries.Add(battery);
+        }
+
+        hasSpawnedOnce = true;
     }
 
-    private IEnumerator RespawnRoutine(BatteryItem item, float minDelay, float maxDelay)
+    private void HandleBatteryCollected(BatteryItem battery)
     {
-        bool placed = false;
-        while (!placed)
-        {
-            float delay = Random.Range(minDelay, maxDelay);
-            yield return new WaitForSeconds(delay);
+        if (battery == null)
+            return;
 
-            // 위치를 찾을 때까지 maxTryCount만큼 시도
-            for (int i = 0; i < maxTryCount; i++)
-            {
-                if (TryGetValidPosition(out Vector3 localPos, item.gameObject))
-                {
-                    item.transform.localPosition = localPos;
-                    item.Show();
-                    placed = true;
-                    break;
-                }
-            }
-            // 실패했다면 다음 루프(delay 후)에서 다시 시도함
-            if (!placed) Debug.LogWarning($"{item.name} 위치 찾기 실패. 재시도 예정.");
+        if (respawnCoroutines.TryGetValue(battery, out Coroutine oldCoroutine))
+        {
+            StopCoroutine(oldCoroutine);
+            respawnCoroutines.Remove(battery);
+        }
+
+        Coroutine coroutine = StartCoroutine(RespawnRoutine(battery));
+        respawnCoroutines.Add(battery, coroutine);
+    }
+
+    private IEnumerator RespawnRoutine(BatteryItem battery)
+    {
+        yield return new WaitForSeconds(respawnDelay);
+
+        if (battery == null)
+            yield break;
+
+        if (groundResolver.TryResolveGround(out Vector3 groundPosition))
+        {
+            spawnCenter = groundPosition;
+        }
+
+        battery.transform.position = GetValidSpawnPosition();
+        battery.gameObject.SetActive(true);
+
+        if (respawnCoroutines.ContainsKey(battery))
+        {
+            respawnCoroutines.Remove(battery);
         }
     }
 
-    private bool TryGetValidPosition(out Vector3 localPos, GameObject ignoreObject = null)
+    private Vector3 GetValidSpawnPosition()
     {
-        float rx = Random.Range(-rangeX, rangeX);
-        float rz = Random.Range(-rangeZ, rangeZ);
-        localPos = new Vector3(rx, spawnY, rz);
-
-        Vector3 worldPos = transform.TransformPoint(localPos);
-        Collider[] hitColliders = Physics.OverlapSphere(worldPos, checkRadius);
-
-        foreach (var col in hitColliders)
+        for (int tryCount = 0; tryCount < 30; tryCount++)
         {
-            if (col.CompareTag("Battery") && col.gameObject != ignoreObject)
+            Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
+
+            Vector3 candidatePosition = new Vector3(
+                spawnCenter.x + randomCircle.x,
+                spawnCenter.y + spawnHeightOffset,
+                spawnCenter.z + randomCircle.y
+            );
+
+            if (IsPositionValid(candidatePosition))
             {
-                return false; // 다른 배터리가 이미 있음
+                return candidatePosition;
             }
         }
+
+        return spawnCenter + Vector3.up * spawnHeightOffset;
+    }
+
+    private bool IsPositionValid(Vector3 candidatePosition)
+    {
+        for (int i = 0; i < spawnedBatteries.Count; i++)
+        {
+            BatteryItem battery = spawnedBatteries[i];
+
+            if (battery == null || !battery.gameObject.activeSelf)
+                continue;
+
+            float distance = Vector3.Distance(candidatePosition, battery.transform.position);
+
+            if (distance < minDistanceBetweenBatteries)
+            {
+                return false;
+            }
+        }
+
         return true;
     }
 }
