@@ -37,18 +37,19 @@ public class BatteryCollector : MonoBehaviour
         if (!Physics.Raycast(ray, out RaycastHit hit, rayDistance, batteryLayer))
             return;
 
-        if (!hit.collider.TryGetComponent(out BatteryItem batteryItem))
-            return;
+        if (hit.collider.TryGetComponent(out BatteryItem batteryItem))
+        {
+            float distanceToBattery = Vector3.Distance(
+                arCamera.transform.position,
+                batteryItem.transform.position
+            );
 
-        float distanceToBattery = Vector3.Distance(
-            arCamera.transform.position,
-            batteryItem.transform.position
-        );
+            if (distanceToBattery > collectDistance)
+                return;
 
-        if (distanceToBattery > collectDistance)
-            return;
-
-        Debug.Log("배터리 수집, 필터 시간 증가량: " + batteryItem.FilterTimeAmount);
-        batteryItem.Collect();
+            Debug.Log("배터리 수집, 필터 시간 증가량: " + batteryItem.FilterTimeAmount);
+            batteryItem.Collect();
+        }
+        
     }
 }
