@@ -1,75 +1,188 @@
 using UnityEngine;
-
+using System.Collections;
 public class EnemyAI : MonoBehaviour
 {
-    [Header("추적 및 공격 설정")]
-    public float moveSpeed = 1.0f;      // 이동 속도 (초당 1미터 이동)
-    public float attackRange = 2.0f;    // 공격 사거리 (카메라와 이 거리보다 가까워지면 멈춤)
-    public float attackCooldown = 2.0f; // 공격 쿨타임 (2초마다 한 번씩 공격)
-    private PlayerHealth targetPlayer;    private Transform playerCamera;     // 플레이어의 눈(AR 카메라) 위치
-    private float lastAttackTime;       // 마지막으로 공격한 시간 기록
+    [Header("거리 경계선 (Thresholds)")]
+    public float detectionRange = 5.0f; 
+    public float attackRange = 1.5f;     
+    public float wanderRadius = 4.0f;    
+    
+    [Header("속도 및 특성")]
+    public float wanderSpeed = 0.8f;   
+    public float chaseSpeed = 2.0f;      
+    public float floatSpeed = 2.0f;      
+    public float floatHeight = 0.3f;     
+    public float attackCooldown = 2.0f;
+    
+    [Header("전투(회피) 기동 설정")]
+    public float dodgeSpeed = 2.5f;       
+    public float dodgeInterval = 0.5f;   
+    private Vector3 currentDodgeDirection;
+    private float nextDodgeTime;
+
+    private Transform playerCamera;
+    private PlayerHealth targetPlayer;
+    private Vector3 targetWanderPoint;
+    private float lastAttackTime;
+    private float originalY;
+    private bool isAttacking = false;
 
     void Start()
     {
-        // AR 환경에서 플레이어는 곧 'Main Camera'입니다.
-        // 게임 시작 시 카메라의 위치를 찾아 기억해 둡니다.
-        if (Camera.main != null)
+        if (Camera.main != null) 
         {
             playerCamera = Camera.main.transform;
-            
-            // [수정된 핵심 로직] 카메라에 붙어있는 PlayerHealth 컴포넌트를 찾아옵니다.
-            targetPlayer = playerCamera.GetComponent<PlayerHealth>();
+            targetPlayer = playerCamera.GetComponent<PlayerHealth>(); 
         }
-        else
-        {
-            Debug.LogError("치명적 에러: 씬에 MainCamera 태그가 붙은 카메라가 없습니다!");
-        }
-
+        SetNewWanderPoint();
     }
 
     void Update()
     {
-        // 카메라를 못 찾았다면 아무 행동도 하지 않음
-        if (playerCamera == null) return;
+        if (playerCamera == null || isAttacking) return;
 
-        // 1. 적(자신)과 플레이어(카메라) 사이의 실제 물리적 거리(미터) 계산
         float distanceToPlayer = Vector3.Distance(transform.position, playerCamera.position);
 
-        // 2. 상태 판단: 사거리 밖인가, 안인가?
-        if (distanceToPlayer > attackRange)
+        // [핵심 논리 분해] 거리에 따른 3단계 행동 강제
+        if (distanceToPlayer > detectionRange)
         {
-            ChasePlayer(); // 멀면 쫓아간다
+            WanderAround(); 
         }
-        else
+        else if (distanceToPlayer <= detectionRange && distanceToPlayer > attackRange)
         {
-            AttackPlayer(); // 가까우면 멈춰서 때린다
+            ChasePlayer(); 
+        }
+       else
+        {
+            EngagePlayer(); 
         }
     }
 
+    
+    void WanderAround()
+    {
+        Vector3 direction = (targetWanderPoint - transform.position).normalized;
+        if (direction != Vector3.zero)
+        {
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 3f);
+        }
+
+        transform.position = Vector3.MoveTowards(transform.position, targetWanderPoint, wanderSpeed * Time.deltaTime);
+        
+        if (Vector3.Distance(transform.position, targetWanderPoint) < 0.2f)
+        {
+            SetNewWanderPoint();
+        }
+        ApplyFloatingEffect();
+    }
+
+    void SetNewWanderPoint()
+    {
+        
+        Vector2 randomPoint = Random.insideUnitCircle * wanderRadius;
+        
+
+        targetWanderPoint = transform.position + new Vector3(randomPoint.x, 0, randomPoint.y);
+ 
+        targetWanderPoint.y = playerCamera.position.y; 
+        
+      
+        originalY = targetWanderPoint.y; 
+    }
+  
     void ChasePlayer()
     {
-        // 플레이어(카메라)를 정면으로 바라보게 회전시킵니다.
+
         transform.LookAt(playerCamera);
         
-        // 바라보는 방향(앞)으로 지정된 속도만큼 이동합니다.
-        transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+       
+        transform.position = Vector3.MoveTowards(transform.position, playerCamera.position, chaseSpeed * Time.deltaTime);
+        
+        ApplyFloatingEffect();
     }
 
-    void AttackPlayer()
+    void ApplyFloatingEffect()
     {
+        float newY = transform.position.y + (Mathf.Sin(Time.time * floatSpeed) * floatHeight * Time.deltaTime);
+        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+    }
+
+    void EngagePlayer()
+    {
+        
+        transform.LookAt(playerCamera);
+
+
         if (Time.time >= lastAttackTime + attackCooldown)
         {
-            // [수정된 핵심 로직] 단순히 로그만 띄우는 게 아니라, 진짜로 데미지를 10 깎습니다.
-            if (targetPlayer != null)
-            {
-                targetPlayer.TakeDamage(10f);
-            }
-            else
-            {
-                Debug.LogWarning("때리려고 했는데 플레이어한테 PlayerHealth 스크립트가 없습니다!");
-            }
-            
-            lastAttackTime = Time.time; 
+            Debug.Log($"<color=red>[발견 및 공격!]</color> 원혼이 틈을 노려 점프 스케어를 시전합니다!");
+            StartCoroutine(JumpScareAttack());
+            lastAttackTime = Time.time;
         }
+      
+        else
+        {
+            DodgeMovement();
+        }
+    }
+
+    void DodgeMovement()
+    {
+      
+        if (Time.time >= nextDodgeTime)
+        {
+            
+            float randomX = Random.Range(-1f, 1f); 
+            float randomZ = Random.Range(-0.8f, 0.2f); 
+
+            Vector3 rightMovement = playerCamera.right * randomX;
+            Vector3 forwardMovement = playerCamera.forward * randomZ;
+
+            currentDodgeDirection = (rightMovement + forwardMovement).normalized;
+            nextDodgeTime = Time.time + dodgeInterval;
+        }
+
+     
+        transform.position += currentDodgeDirection * dodgeSpeed * Time.deltaTime;
+        
+
+        float newY = playerCamera.position.y + (Mathf.Sin(Time.time * floatSpeed) * floatHeight);
+        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+    }
+
+    IEnumerator JumpScareAttack()
+    {
+        isAttacking = true; 
+
+        Vector3 originalPos = transform.position;
+        Vector3 targetPos = playerCamera.position + (playerCamera.forward * 0.5f);
+
+        float dashDuration = 0.1f;
+        float elapsed = 0f;
+        while (elapsed < dashDuration)
+        {
+            transform.position = Vector3.Lerp(originalPos, targetPos, elapsed / dashDuration);
+            elapsed += Time.deltaTime;
+            yield return null; 
+        }
+
+        if (targetPlayer != null) 
+        {
+            targetPlayer.TakeDamage(10f); 
+        }
+
+        yield return new WaitForSeconds(0.2f);
+
+        float returnDuration = 0.3f;
+        elapsed = 0f;
+        while (elapsed < returnDuration)
+        {
+            transform.position = Vector3.Lerp(targetPos, originalPos, elapsed / returnDuration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        isAttacking = false; 
     }
 }
