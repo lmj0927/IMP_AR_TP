@@ -12,7 +12,7 @@ public class BatterySpawner : MonoBehaviour
     [SerializeField] private int spawnCount = 5;
     [SerializeField] private float spawnRadius = 2f;
     [SerializeField] private float respawnDelay = 5f;
-    [SerializeField] private float spawnHeightOffset = 0.05f;
+    [SerializeField] private float spawnHeightOffset = 0.8f;
     [SerializeField] private float minDistanceBetweenBatteries = 0.7f;
 
     private readonly List<BatteryItem> spawnedBatteries = new();
