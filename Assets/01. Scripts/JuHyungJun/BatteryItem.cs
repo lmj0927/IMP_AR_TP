@@ -17,5 +17,6 @@ public class BatteryItem : MonoBehaviour
 
         gameObject.SetActive(false);
         OnCollected?.Invoke(this);
+        GameManager.Instance.IncreaseLeftFilterTime(filterTimeAmount);
     }
 }

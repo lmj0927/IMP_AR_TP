@@ -22,6 +22,7 @@ public class FilterCamera : MonoBehaviour
         filterButton.onClick.AddListener(OnClickFilterButton);
         leftFilterTime = filterTime;
         filterGaugeSlider.maxValue = filterTime;
+        filterGaugeSlider.value = filterTime;
         mainCam = Camera.main;
     }
 
@@ -56,7 +57,7 @@ public class FilterCamera : MonoBehaviour
         if (isOnFilter)
         {
             mainCam.cullingMask &= ~(1 << LayerMask.NameToLayer("Enemy"));
-            filterGaugeSlider.gameObject.SetActive(false);
+            
             while (filterVolume.weight > 0)
             {
                 filterVolume.weight -= Time.deltaTime * 2;
@@ -66,7 +67,6 @@ public class FilterCamera : MonoBehaviour
         else
         {
             mainCam.cullingMask |= 1 << LayerMask.NameToLayer("Enemy");
-            filterGaugeSlider.gameObject.SetActive(true);
             while (filterVolume.weight < 1)
             {
                 filterVolume.weight += Time.deltaTime * 2;

@@ -11,7 +11,7 @@ public class AREnemySpawner : MonoBehaviour
 
     private GameObject enemy;
 
-    void Start()
+    void Awake()
     {
         trackedImgManager = GetComponent<ARTrackedImageManager>();
     }

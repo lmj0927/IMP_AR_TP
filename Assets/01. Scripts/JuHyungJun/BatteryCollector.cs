@@ -10,32 +10,41 @@ public class BatteryCollector : MonoBehaviour
     [SerializeField] private float collectDistance = 2f;
     [SerializeField] private LayerMask batteryLayer;
 
+    private bool canCollect = false;
+    private BatteryItem collectBattery;
     private void Update()
     {
+        canCollect = TryCollectBattery();
 #if UNITY_EDITOR
-        if (Input.GetMouseButtonDown(0))
+        /*if (Input.GetMouseButtonDown(0))
         {
-            TryCollectBattery();
-        }
+            if (canCollect)
+                collectBattery.Collect();
+        }*/
 #else
-        if (Input.touchCount > 0)
-        {
-            Touch touch = Input.GetTouch(0);
+        // if (Input.touchCount > 0)
+        // {
+        //     Touch touch = Input.GetTouch(0);
 
-            if (touch.phase == TouchPhase.Began)
-            {
-                TryCollectBattery();
-            }
-        }
+        //     if (touch.phase == TouchPhase.Began)
+        //     {
+        //         TryCollectBattery();
+        //     }
+        // }
 #endif
     }
 
-    private void TryCollectBattery()
+    public void CollectItem()
+    {
+        collectBattery.Collect();
+    }
+
+    private bool TryCollectBattery()
     {
         Ray ray = arCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
         if (!Physics.Raycast(ray, out RaycastHit hit, rayDistance, batteryLayer))
-            return;
+            return false;
 
         if (hit.collider.TryGetComponent(out BatteryItem batteryItem))
         {
@@ -45,11 +54,18 @@ public class BatteryCollector : MonoBehaviour
             );
 
             if (distanceToBattery > collectDistance)
-                return;
+                return false;
 
-            Debug.Log("배터리 수집, 필터 시간 증가량: " + batteryItem.FilterTimeAmount);
-            batteryItem.Collect();
+            
+            collectBattery = batteryItem;
+            //batteryItem.Collect();
+            return true;
         }
-        
+        return false;
+    }
+    
+    public bool GetCanCollect()
+    {
+        return canCollect;
     }
 }

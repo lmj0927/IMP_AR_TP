@@ -46,15 +46,16 @@ public class EnemyAI : MonoBehaviour
         // [핵심 논리 분해] 거리에 따른 3단계 행동 강제
         if (distanceToPlayer > detectionRange)
         {
-            WanderAround(); 
+            //WanderAround();
+            ChasePlayer();
         }
         else if (distanceToPlayer <= detectionRange && distanceToPlayer > attackRange)
         {
-            ChasePlayer(); 
+            ChasePlayer();
         }
-       else
+        else
         {
-            EngagePlayer(); 
+            EngagePlayer();
         }
     }
 
@@ -169,7 +170,7 @@ public class EnemyAI : MonoBehaviour
 
         if (targetPlayer != null) 
         {
-            targetPlayer.TakeDamage(10f); 
+            targetPlayer.TakeDamage(); 
         }
 
         yield return new WaitForSeconds(0.2f);
