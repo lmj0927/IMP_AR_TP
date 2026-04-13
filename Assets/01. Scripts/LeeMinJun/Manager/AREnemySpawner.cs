@@ -1,11 +1,15 @@
+using System.Collections.Generic;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using UnityEngine.XR.ARSubsystems;
 
 public class AREnemySpawner : MonoBehaviour
 {
     private ARTrackedImageManager trackedImgManager;
-    [SerializeField] private GameObject objectToInstantiate;
-    
+    [SerializeField] private List<GameObject> enemyPrefabs;
+
+    private GameObject enemy;
 
     void Awake()
     {
@@ -29,11 +33,24 @@ public class AREnemySpawner : MonoBehaviour
             Debug.Log(trackedImage.referenceImage.name);
             if (trackedImage.referenceImage.name == "Enemy")
             {
-                var randX = Random.Range(-10, 10);
-                var randZ = Random.Range(-10, 10);
-                var offset = new Vector3(randX, 0, randZ);
-                Instantiate(objectToInstantiate, Camera.main.transform.position + offset, Quaternion.identity);
+                SpawnEnemy();
             }
         }
+
+        foreach (var trackedImage in args.updated)
+        {
+            if (trackedImage.referenceImage.name == "Enemy" && trackedImage.trackingState == TrackingState.Tracking && enemy == null)
+            {
+                SpawnEnemy();
+            }
+        }
+    }
+
+    private void SpawnEnemy()
+    {
+        var randX = Random.Range(-10, 10);
+        var randZ = Random.Range(-10, 10);
+        var offset = new Vector3(randX, 0, randZ);
+        enemy = Instantiate(enemyPrefabs[Mathf.Min(GameManager.Instance.GetStageLevel(), enemyPrefabs.Count - 1 )], Camera.main.transform.position + offset, Quaternion.identity);
     }
 }

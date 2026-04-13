@@ -10,18 +10,19 @@ public class FilterCamera : MonoBehaviour
     [SerializeField] private Slider filterGaugeSlider;
     [SerializeField] private float filterTime;
     [SerializeField] private Volume filterVolume;
-    
+
     private float leftFilterTime;
     bool isOnFilter = false;
     Camera mainCam;
 
     Coroutine filterCoroutine;
-    
+
     void Start()
     {
         filterButton.onClick.AddListener(OnClickFilterButton);
         leftFilterTime = filterTime;
         filterGaugeSlider.maxValue = filterTime;
+        filterGaugeSlider.value = filterTime;
         mainCam = Camera.main;
     }
 
@@ -29,9 +30,9 @@ public class FilterCamera : MonoBehaviour
     {
         if (isOnFilter)
         {
-            if(leftFilterTime <= 0)
+            if (leftFilterTime <= 0)
                 ChangeFilter();
-            
+
             leftFilterTime -= Time.deltaTime;
             filterGaugeSlider.value = leftFilterTime;
         }
@@ -46,18 +47,17 @@ public class FilterCamera : MonoBehaviour
 
     private void ChangeFilter()
     {
-        if(filterCoroutine != null)
+        if (filterCoroutine != null)
             StopCoroutine(filterCoroutine);
-        filterCoroutine = StartCoroutine(FilterCoroutine());
+        filterCoroutine = StartCoroutine(FilterEffectCoroutine());
     }
 
-    IEnumerator FilterCoroutine()    
+    IEnumerator FilterEffectCoroutine()
     {
-        
         if (isOnFilter)
         {
             mainCam.cullingMask &= ~(1 << LayerMask.NameToLayer("Enemy"));
-            filterGaugeSlider.gameObject.SetActive(false);
+            
             while (filterVolume.weight > 0)
             {
                 filterVolume.weight -= Time.deltaTime * 2;
@@ -67,7 +67,6 @@ public class FilterCamera : MonoBehaviour
         else
         {
             mainCam.cullingMask |= 1 << LayerMask.NameToLayer("Enemy");
-            filterGaugeSlider.gameObject.SetActive(true);
             while (filterVolume.weight < 1)
             {
                 filterVolume.weight += Time.deltaTime * 2;
@@ -75,5 +74,12 @@ public class FilterCamera : MonoBehaviour
             }
         }
         isOnFilter = !isOnFilter;
+    }
+
+    public void IncreaseLeftFilterTime(float increaseAmount)
+    {
+        leftFilterTime += increaseAmount;
+        if (leftFilterTime > filterTime)
+            leftFilterTime = filterTime;
     }
 }
