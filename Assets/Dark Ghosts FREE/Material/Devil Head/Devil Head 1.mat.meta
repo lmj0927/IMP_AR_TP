@@ -1,7 +1,8 @@
 fileFormatVersion: 2
-guid: 599519992bda7c14399432c05b55666c
-PrefabImporter:
+guid: ae7a76d5b5195b94a8dbfb2e1a0cef92
+NativeFormatImporter:
   externalObjects: {}
+  mainObjectFileID: 2100000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
@@ -10,5 +11,5 @@ AssetOrigin:
   productId: 350600
   packageName: Dark Ghosts FREE
   packageVersion: 1.0
-  assetPath: Assets/02. Prefabs/MJH/Prefabs/LittleGhost_4.prefab
+  assetPath: Assets/Dark Ghosts FREE/Material/Devil Head/Devil Head 1.mat
   uploadId: 835174
