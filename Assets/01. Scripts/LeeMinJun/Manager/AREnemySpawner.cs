@@ -48,9 +48,6 @@ public class AREnemySpawner : MonoBehaviour
 
     private void SpawnEnemy()
     {
-        var randX = Random.Range(-10, 10);
-        var randZ = Random.Range(-10, 10);
-        var offset = new Vector3(randX, 0, randZ);
-        enemy = Instantiate(enemyPrefabs[Mathf.Min(GameManager.Instance.GetStageLevel(), enemyPrefabs.Count - 1 )], Camera.main.transform.position + offset, Quaternion.identity);
+        enemy = Instantiate(enemyPrefabs[Mathf.Min(GameManager.Instance.GetStageLevel(), enemyPrefabs.Count - 1 )], Camera.main.transform.position, Quaternion.identity);
     }
 }

@@ -1101,7 +1101,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.000061035156, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 250, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &620459857
@@ -2329,7 +2329,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AREnemySpawner
   enemyPrefabs:
-  - {fileID: 3219947738364379576, guid: 7f285d7c376f6f243ab8e1df874e38b9, type: 3}
+  - {fileID: 6180285084413637326, guid: 599519992bda7c14399432c05b55666c, type: 3}
   - {fileID: 3219947738364379576, guid: 7f285d7c376f6f243ab8e1df874e38b9, type: 3}
   - {fileID: 3219947738364379576, guid: 7f285d7c376f6f243ab8e1df874e38b9, type: 3}
 --- !u!114 &1227409913
@@ -3225,7 +3225,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.000061035156, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 250, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1709896591
@@ -3241,7 +3241,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 1, g: 0, b: 0, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3302,7 +3302,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.000061035156, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 250, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1768153366
@@ -3970,7 +3970,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1073741879
+    m_Bits: 1073742007
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -4063,7 +4063,7 @@ MonoBehaviour:
   damageFlash: {fileID: 1709896591}
   flashSpeed: 5
   flashColor: {r: 1, g: 0, b: 0, a: 0.5}
-  muzzle: {fileID: 8121229282770091345, guid: 0dcaa2b03774aed46b0c8ec9fd953894, type: 3}
+  muzzle: {fileID: 1917537673}
   range: 50
   attackDamage: 10
   bulletPrefab: {fileID: 3718545878496694674, guid: 0dcaa2b03774aed46b0c8ec9fd953894, type: 3}

@@ -24,10 +24,9 @@ public class EnemyAI : MonoBehaviour
     private PlayerHealth targetPlayer;
     private Vector3 targetWanderPoint;
     private float lastAttackTime;
-    private float originalY;
     private bool isAttacking = false;
 
-    void Start()
+    void Awake()
     {
         if (Camera.main != null) 
         {
@@ -46,7 +45,7 @@ public class EnemyAI : MonoBehaviour
         // [핵심 논리 분해] 거리에 따른 3단계 행동 강제
         if (distanceToPlayer > detectionRange)
         {
-            //WanderAround();
+            WanderAround();
             ChasePlayer();
         }
         else if (distanceToPlayer <= detectionRange && distanceToPlayer > attackRange)
@@ -89,7 +88,7 @@ public class EnemyAI : MonoBehaviour
         targetWanderPoint.y = playerCamera.position.y; 
         
       
-        originalY = targetWanderPoint.y; 
+        transform.position = targetWanderPoint;
     }
   
     void ChasePlayer()

@@ -1,7 +1,11 @@
 fileFormatVersion: 2
-guid: 599519992bda7c14399432c05b55666c
-PrefabImporter:
+guid: b3669bdc2ff810741a270a5dfea73794
+MonoImporter:
   externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
   userData: 
   assetBundleName: 
   assetBundleVariant: 
@@ -10,5 +14,5 @@ AssetOrigin:
   productId: 350600
   packageName: Dark Ghosts FREE
   packageVersion: 1.0
-  assetPath: Assets/02. Prefabs/MJH/Prefabs/LittleGhost_4.prefab
+  assetPath: Assets/Dark Ghosts FREE/Scripts/anim_clip_offset.cs
   uploadId: 835174

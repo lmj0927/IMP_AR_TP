@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 599519992bda7c14399432c05b55666c
-PrefabImporter:
+guid: fec9096fe150bd4489d3d36613b471a7
+TextScriptImporter:
   externalObjects: {}
   userData: 
   assetBundleName: 
@@ -10,5 +10,5 @@ AssetOrigin:
   productId: 350600
   packageName: Dark Ghosts FREE
   packageVersion: 1.0
-  assetPath: Assets/02. Prefabs/MJH/Prefabs/LittleGhost_4.prefab
+  assetPath: Assets/Dark Ghosts FREE/Documentation(Little Ghost FREE).txt
   uploadId: 835174
