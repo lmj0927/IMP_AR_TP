@@ -1,52 +1,55 @@
 using System;
 using UnityEngine;
 
+// Represents the individual collectable item in the scene.
+// Handles the visual hover/rotate effects and collection logic.
+
 public class BatteryItem : MonoBehaviour
 {
     [Header("Battery Data")]
     [SerializeField] private float filterTimeAmount = 5f;
 
     [Header("Floating Animation")]
-    [SerializeField] private float moveSpeed = 2f;      // 움직이는 속도
-    [SerializeField] private float moveAmount = 0.1f;    // 움직이는 범위 (0.1m = 10cm)
-    [SerializeField] private bool rotate = true;        // 회전 여부
-    [SerializeField] private float rotateSpeed = 50f;   // 회전 속도
+    [SerializeField] private float moveSpeed = 2f;      // Floating speed
+    [SerializeField] private float moveAmount = 0.1f;    // Floating range 10cm
+    [SerializeField] private bool rotate = true;        // Enable rotation
+    [SerializeField] private float rotateSpeed = 50f;   // Rotation speed
 
     private Vector3 startPosition;
 
     public float FilterTimeAmount => filterTimeAmount;
-    public Action<BatteryItem> OnCollected;
+    public Action<BatteryItem> OnCollected; // Event triggered when collected
 
     private void Start()
     {
-        // 시작 위치를 저장해둡니다.
+        // Store the initial position for the floating animation
         startPosition = transform.position;
     }
 
     private void Update()
     {
-        // Sin 곡선으로 위 아래로 왔다갔다
+        // vertical hover using a Sine wave
         float newY = startPosition.y + Mathf.Sin(Time.time * moveSpeed) * moveAmount;
         transform.position = new Vector3(transform.position.x, newY, transform.position.z);
-
-        // 2. 회전 효과 (선택 사항)
+        // rotating battery
         if (rotate)
         {
             transform.Rotate(Vector3.up, rotateSpeed * Time.deltaTime);
         }
     }
-
+    
+    //Handles the collection logic, deactivation, and event broadcasting
     public void Collect()
     {
         if (!gameObject.activeSelf)
             return;
-
+        // Notify the spawner to start the respawn timer
         gameObject.SetActive(false);
-        OnCollected?.Invoke(this);
+        OnCollected?.Invoke(this); // Trigger Spawner to start respawn coroutine
         GameManager.Instance.IncreaseLeftFilterTime(filterTimeAmount);
     }
 
-    // 리스폰 될 때 위치 초기화를 위해 OnEnable 사용
+    // Update startPosition when respawning to prevent Y-axis drifting
     private void OnEnable()
     {
         startPosition = transform.position;
