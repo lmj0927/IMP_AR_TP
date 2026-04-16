@@ -1,9 +1,10 @@
 using UnityEngine;
 using System.Collections;
+
 public class EnemyAI : MonoBehaviour
 {
-    [Header("거리 경계선 (Thresholds)")]
-    public float detectionRange = 5.0f; 
+    [Header("거리 경계선")]
+    public float detectionRange = 5.0f;  
     public float attackRange = 1.5f;     
     public float wanderRadius = 4.0f;    
     
@@ -13,18 +14,24 @@ public class EnemyAI : MonoBehaviour
     public float floatSpeed = 2.0f;      
     public float floatHeight = 0.3f;     
     public float attackCooldown = 2.0f;
-    
-    [Header("전투(회피) 기동 설정")]
+
+    [Header("회피 및 넉백 설정")]
     public float dodgeSpeed = 2.5f;       
     public float dodgeInterval = 0.5f;   
+    public float knockbackForce = 1.0f;     
+    public float staggerDuration = 0.5f;    
+    public float awakeDelay = 3.0f;      
+
+    private float spawnTime;             
+    private bool isAwake = false;        
+    private bool isStaggered = false;    
+
     private Vector3 currentDodgeDirection;
     private float nextDodgeTime;
-
     private Transform playerCamera;
     private PlayerHealth targetPlayer;
     private Vector3 targetWanderPoint;
     private float lastAttackTime;
-    private float originalY;
     private bool isAttacking = false;
 
     void Start()
@@ -35,30 +42,58 @@ public class EnemyAI : MonoBehaviour
             targetPlayer = playerCamera.GetComponent<PlayerHealth>(); 
         }
         SetNewWanderPoint();
+        spawnTime = Time.time; 
     }
 
     void Update()
     {
-        if (playerCamera == null || isAttacking) return;
+        if (playerCamera == null || isAttacking || isStaggered) return;
+
+        if (!isAwake)
+        {
+            transform.LookAt(playerCamera); 
+            ApplyFloatingEffect();          
+            if (Time.time >= spawnTime + awakeDelay) isAwake = true;
+            return; 
+        }
 
         float distanceToPlayer = Vector3.Distance(transform.position, playerCamera.position);
 
-        // [핵심 논리 분해] 거리에 따른 3단계 행동 강제
-        if (distanceToPlayer > detectionRange)
-        {
-            WanderAround(); 
-        }
-        else if (distanceToPlayer <= detectionRange && distanceToPlayer > attackRange)
-        {
-            ChasePlayer(); 
-        }
-       else
-        {
-            EngagePlayer(); 
-        }
+        if (distanceToPlayer > detectionRange) WanderAround(); 
+        else if (distanceToPlayer <= detectionRange && distanceToPlayer > attackRange) ChasePlayer(); 
+        else EngagePlayer(); 
     }
 
-    
+    public void ApplyKnockback(Vector3 hitDirection)
+    {
+        if (!isAwake || isAttacking) return; 
+        StopCoroutine("StaggerRoutine"); 
+        StartCoroutine(StaggerRoutine(hitDirection));
+    }
+
+    private IEnumerator StaggerRoutine(Vector3 hitDirection)
+    {
+        isStaggered = true; 
+        hitDirection.y = 0;
+        hitDirection.Normalize();
+
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = startPos + (hitDirection * knockbackForce);
+
+        float elapsed = 0f;
+        float pushDuration = 0.15f; 
+
+        while (elapsed < pushDuration)
+        {
+            transform.position = Vector3.Lerp(startPos, targetPos, elapsed / pushDuration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(Mathf.Max(0, staggerDuration - pushDuration));
+        isStaggered = false; 
+    }
+
     void WanderAround()
     {
         Vector3 direction = (targetWanderPoint - transform.position).normalized;
@@ -67,38 +102,22 @@ public class EnemyAI : MonoBehaviour
             Quaternion lookRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 3f);
         }
-
         transform.position = Vector3.MoveTowards(transform.position, targetWanderPoint, wanderSpeed * Time.deltaTime);
-        
-        if (Vector3.Distance(transform.position, targetWanderPoint) < 0.2f)
-        {
-            SetNewWanderPoint();
-        }
+        if (Vector3.Distance(transform.position, targetWanderPoint) < 0.2f) SetNewWanderPoint();
         ApplyFloatingEffect();
     }
 
     void SetNewWanderPoint()
     {
-        
         Vector2 randomPoint = Random.insideUnitCircle * wanderRadius;
-        
-
         targetWanderPoint = transform.position + new Vector3(randomPoint.x, 0, randomPoint.y);
- 
-        targetWanderPoint.y = playerCamera.position.y; 
-        
-      
-        originalY = targetWanderPoint.y; 
+        targetWanderPoint.y = transform.position.y; 
     }
-  
+
     void ChasePlayer()
     {
-
         transform.LookAt(playerCamera);
-        
-       
         transform.position = Vector3.MoveTowards(transform.position, playerCamera.position, chaseSpeed * Time.deltaTime);
-        
         ApplyFloatingEffect();
     }
 
@@ -110,45 +129,26 @@ public class EnemyAI : MonoBehaviour
 
     void EngagePlayer()
     {
-        
         transform.LookAt(playerCamera);
-
-
         if (Time.time >= lastAttackTime + attackCooldown)
         {
-            Debug.Log($"<color=red>[발견 및 공격!]</color> 원혼이 틈을 노려 점프 스케어를 시전합니다!");
             StartCoroutine(JumpScareAttack());
             lastAttackTime = Time.time;
         }
-      
-        else
-        {
-            DodgeMovement();
-        }
+        else DodgeMovement();
     }
 
     void DodgeMovement()
     {
-      
         if (Time.time >= nextDodgeTime)
         {
-            
-            float randomX = Random.Range(-1f, 1f); 
-            float randomZ = Random.Range(-0.8f, 0.2f); 
-
+            float randomX = Random.Range(-3f, 3f); 
             Vector3 rightMovement = playerCamera.right * randomX;
-            Vector3 forwardMovement = playerCamera.forward * randomZ;
-
-            currentDodgeDirection = (rightMovement + forwardMovement).normalized;
+            currentDodgeDirection = rightMovement.normalized;
             nextDodgeTime = Time.time + dodgeInterval;
         }
-
-     
         transform.position += currentDodgeDirection * dodgeSpeed * Time.deltaTime;
-        
-
-        float newY = playerCamera.position.y + (Mathf.Sin(Time.time * floatSpeed) * floatHeight);
-        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+        ApplyFloatingEffect(); 
     }
 
     IEnumerator JumpScareAttack()
@@ -167,11 +167,7 @@ public class EnemyAI : MonoBehaviour
             yield return null; 
         }
 
-        if (targetPlayer != null) 
-        {
-            targetPlayer.TakeDamage(10f); 
-        }
-
+        if (targetPlayer != null) targetPlayer.TakeDamage(10f); 
         yield return new WaitForSeconds(0.2f);
 
         float returnDuration = 0.3f;

@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
-using UnityEngine.InputSystem; // 신형 입력 시스템 사용을 위한 필수 선언
-using UnityEngine.EventSystems;
 public class PlayerHealth : MonoBehaviour
 {
     [Header("생존 수치")]
@@ -13,89 +12,80 @@ public class PlayerHealth : MonoBehaviour
     public Image damageFlash;      
     public float flashSpeed = 5f;          
     public Color flashColor = new Color(1f, 0f, 0f, 0.5f); 
+    private bool isDamaged = false;        
 
-    private bool isDamaged = false;         
+    [Header("전투 (히트스캔 저격)")]
+    public float range = 50f;          
+    public float attackDamage = 10f;   
 
-    public Transform muzzle;
-    public float range = 50f;
-    public float attackDamage = 10f;
-    public GameObject bulletPrefab;
-    
+    [Header("자원 (탄력/정신력)")]
+    public int maxAmmo = 10;             
+    private int currentAmmo;             
+    public float rechargeTime = 3.0f;    
+    private float rechargeTimer = 0f;    
+    public TextMeshProUGUI ammoUIText;        
+
     private Camera arCamera;
 
     void Start()
     {
         currentHealth = maxHealth;
+        currentAmmo = maxAmmo; 
         if (damageFlash != null) damageFlash.color = Color.clear; 
-         arCamera = Camera.main;
+        arCamera = Camera.main;
+        UpdateAmmoUI();
     }
 
     void Update()
     {
-        
-        if (isDamaged)
+        if (currentAmmo < maxAmmo)
         {
-            damageFlash.color = flashColor;
+            rechargeTimer += Time.deltaTime;
+            if (rechargeTimer >= rechargeTime)
+            {
+                currentAmmo++;
+                rechargeTimer = 0f;
+                UpdateAmmoUI();
+            }
         }
-        else if (damageFlash != null)
-        {
-            damageFlash.color = Color.Lerp(damageFlash.color, Color.clear, flashSpeed * Time.deltaTime);
-        }
+
+        if (isDamaged) damageFlash.color = flashColor;
+        else if (damageFlash != null) damageFlash.color = Color.Lerp(damageFlash.color, Color.clear, flashSpeed * Time.deltaTime);
         
         isDamaged = false;
-
-        if (Pointer.current != null && Pointer.current.press.wasPressedThisFrame)
-        {
-      
-            //if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) 
-               // return;
-
-            FireAtPointer();
-    }
     }
 
-   
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
         isDamaged = true; 
+        if (currentHealth <= 0) Debug.Log("<color=black>사망했습니다.</color>");
+    }
 
-        Debug.Log($"<color=orange>[플레이어 피격!]</color> 으악! 남은 체력: {currentHealth}");
+    public void OnAttackButtonPressed()
+    {
+        if (arCamera == null || currentAmmo <= 0) return;
 
-        if (currentHealth <= 0)
+        currentAmmo--;
+        rechargeTimer = 0f; 
+        UpdateAmmoUI();
+
+        Ray ray = arCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, range))
         {
-            Die();
+            TargetHealth target = hit.transform.GetComponent<TargetHealth>();
+            if (target != null)
+            {
+                // 데미지와 타격 방향 2가지를 적에게 전송
+                target.TakeDamage(attackDamage, ray.direction);
+            }
         }
     }
 
-    void Die()
+    void UpdateAmmoUI()
     {
-        Debug.Log("<color=black>당신은 사망했습니다. 게임 오버.</color>");
-   
+        if (ammoUIText != null) ammoUIText.text = $"{currentAmmo} / {maxAmmo}";
     }
-    void FireAtPointer()
-    {
-      Vector2 screenPosition = Vector2.zero;
-
-      
-        if (Touchscreen.current != null && Touchscreen.current.touches.Count > 0)
-            screenPosition = Touchscreen.current.touches[0].position.ReadValue();
-        else if (Mouse.current != null)
-            screenPosition = Mouse.current.position.ReadValue();
-        else return;
-
-   
-        Ray ray = arCamera.ScreenPointToRay(screenPosition);
-
-        
-        if (bulletPrefab != null && muzzle != null)
-        {
-            Instantiate(bulletPrefab, muzzle.position, Quaternion.LookRotation(ray.direction));
-            Debug.Log("<color=cyan>[투사체 발사!]</color> 탕!");
-        }
-        else
-        {
-            Debug.LogError("총알 프리팹이나 총구(Muzzle) 위치가 인스펙터에 할당되지 않았습니다!");
-        }
-}
 }
