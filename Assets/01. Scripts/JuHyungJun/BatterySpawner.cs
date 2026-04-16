@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+//This script manages the procedural spawning of battery items in the AR environment.
+//It handles ground detection, overlap prevention, and independent respawn timers for each item.
 public class BatterySpawner : MonoBehaviour
 {
     [Header("Reference")]
@@ -16,6 +19,8 @@ public class BatterySpawner : MonoBehaviour
     [SerializeField] private float minDistanceBetweenBatteries = 0.7f;
 
     private readonly List<BatteryItem> spawnedBatteries = new();
+    
+    // Tracks active respawn routines to avoid duplicate coroutines for the same object
     private readonly Dictionary<BatteryItem, Coroutine> respawnCoroutines = new();
 
     private Vector3 spawnCenter;
@@ -23,12 +28,14 @@ public class BatterySpawner : MonoBehaviour
 
     private void Update()
     {
+        // Continuously check for ground detection until the first batch of batteries is spawned
         if (!hasSpawnedOnce)
         {
             TrySpawnAllBatteries();
         }
     }
-
+    
+    // Attempts to find an AR plane and instantiate the set amount of batteries
     public void TrySpawnAllBatteries()
     {
         if (!groundResolver.TryResolveGround(out Vector3 groundPosition))
@@ -50,6 +57,7 @@ public class BatterySpawner : MonoBehaviour
                 transform
             );
 
+            // Link the collection event to the handle function for respawning
             battery.OnCollected += HandleBatteryCollected;
             spawnedBatteries.Add(battery);
         }
@@ -57,11 +65,13 @@ public class BatterySpawner : MonoBehaviour
         hasSpawnedOnce = true;
     }
 
+    // Called when a battery is deactivated; initiates the respawn sequence
     private void HandleBatteryCollected(BatteryItem battery)
     {
         if (battery == null)
             return;
-
+        
+        // Stop any existing coroutine for this specific battery before starting a new one
         if (respawnCoroutines.TryGetValue(battery, out Coroutine oldCoroutine))
         {
             StopCoroutine(oldCoroutine);
@@ -72,13 +82,15 @@ public class BatterySpawner : MonoBehaviour
         respawnCoroutines.Add(battery, coroutine);
     }
 
+    // Waits for a delay, updates ground data, and reactivates the battery at a new location
     private IEnumerator RespawnRoutine(BatteryItem battery)
     {
         yield return new WaitForSeconds(respawnDelay);
 
         if (battery == null)
             yield break;
-
+        
+        // Refresh the ground center if the AR environment has updated
         if (groundResolver.TryResolveGround(out Vector3 groundPosition))
         {
             spawnCenter = groundPosition;
@@ -93,8 +105,10 @@ public class BatterySpawner : MonoBehaviour
         }
     }
 
+    // Finds a spawn point that meets the minimum distance requirements from other active batteries
     private Vector3 GetValidSpawnPosition()
     {
+        // Try up to 30 times to find a valid non-overlapping position
         for (int tryCount = 0; tryCount < 30; tryCount++)
         {
             Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
@@ -110,10 +124,12 @@ public class BatterySpawner : MonoBehaviour
                 return candidatePosition;
             }
         }
-
+        
+        // Default fallback if no valid position is found after 30 attempts
         return spawnCenter + Vector3.up * spawnHeightOffset;
     }
 
+    // Validation logic to ensure batteries are not spawned too close to each other
     private bool IsPositionValid(Vector3 candidatePosition)
     {
         for (int i = 0; i < spawnedBatteries.Count; i++)

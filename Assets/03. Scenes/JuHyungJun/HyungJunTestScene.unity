@@ -757,7 +757,7 @@ MonoBehaviour:
   spawnRadius: 2
   respawnDelay: 5
   spawnHeightOffset: 0.05
-  minDistanceBetweenBatteries: 0.7
+  minDistanceBetweenBatteries: 0.2
 --- !u!4 &1375396835
 Transform:
   m_ObjectHideFlags: 0

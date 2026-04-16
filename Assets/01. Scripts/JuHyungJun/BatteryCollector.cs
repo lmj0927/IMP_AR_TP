@@ -1,5 +1,8 @@
 using UnityEngine;
 
+// Attached to the Player/Camera to handle the logic for selecting and collecting items.
+// Uses a Raycast from the viewport center (crosshair) to detect BatteryItem objects.
+
 public class BatteryCollector : MonoBehaviour
 {
     [Header("Reference")]
@@ -14,33 +17,21 @@ public class BatteryCollector : MonoBehaviour
     private BatteryItem collectBattery;
     private void Update()
     {
+        // Update collection status and target item every frame
         canCollect = TryCollectBattery();
-#if UNITY_EDITOR
-        /*if (Input.GetMouseButtonDown(0))
-        {
-            if (canCollect)
-                collectBattery.Collect();
-        }*/
-#else
-        // if (Input.touchCount > 0)
-        // {
-        //     Touch touch = Input.GetTouch(0);
-
-        //     if (touch.phase == TouchPhase.Began)
-        //     {
-        //         TryCollectBattery();
-        //     }
-        // }
-#endif
     }
-
+    
+    //method to be called by a UI Button to finalize collection
     public void CollectItem()
     {
         collectBattery.Collect();
     }
 
+    
+    // Raycasts from the screen center to check for batteries within a valid interaction range
     private bool TryCollectBattery()
     {
+        // Generate ray from the middle of the screen (0.5, 0.5)
         Ray ray = arCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
         if (!Physics.Raycast(ray, out RaycastHit hit, rayDistance, batteryLayer))
@@ -48,6 +39,7 @@ public class BatteryCollector : MonoBehaviour
 
         if (hit.collider.TryGetComponent(out BatteryItem batteryItem))
         {
+            // Check if the physical distance to the item is within the allowed 'collectDistance'
             float distanceToBattery = Vector3.Distance(
                 arCamera.transform.position,
                 batteryItem.transform.position
@@ -64,6 +56,7 @@ public class BatteryCollector : MonoBehaviour
         return false;
     }
     
+    // Returns current interaction status
     public bool GetCanCollect()
     {
         return canCollect;
