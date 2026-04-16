@@ -772,8 +772,11 @@ MonoBehaviour:
   floatSpeed: 2
   floatHeight: 0.3
   attackCooldown: 2
-  dodgeSpeed: 2.5
+  dodgeSpeed: 1.5
   dodgeInterval: 0.5
+  knockbackForce: 1
+  staggerDuration: 0.5
+  awakeDelay: 3
 --- !u!114 &6230335380189426044
 MonoBehaviour:
   m_ObjectHideFlags: 0
