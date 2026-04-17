@@ -3,8 +3,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-using UnityEngine.InputSystem; // 신형 입력 시스템 사용을 위한 필수 선언
-using UnityEngine.EventSystems;
 public class PlayerHealth : MonoBehaviour
 {
     [Header("피격 피드백")]
@@ -14,11 +12,13 @@ public class PlayerHealth : MonoBehaviour
 
     private bool isDamaged = false;         
 
-    public Transform muzzle;
-    public float range = 50f;
-    public float attackDamage = 10f;
-    public GameObject bulletPrefab;
+    [Header("사격 (히트스캔) 설정")]
+    public float range = 50f;          // 레이저가 닿는 최대 거리
+    public float attackDamage = 10f;   // 적에게 입힐 데미지
+    public float fireRate = 0.5f;      // 연사 제한 
+    private float lastFireTime = 0f;
 
+    [Header("체력 관리")]
     [SerializeField]
     private List<HpBox> hpBoxes = new List<HpBox>();    
     
@@ -28,12 +28,11 @@ public class PlayerHealth : MonoBehaviour
     void Start()
     {
         if (damageFlash != null) damageFlash.color = Color.clear; 
-         arCamera = Camera.main;
+        arCamera = Camera.main;
     }
 
     void Update()
     {
-        
         if (isDamaged)
         {
             damageFlash.color = flashColor;
@@ -42,19 +41,20 @@ public class PlayerHealth : MonoBehaviour
         {
             damageFlash.color = Color.Lerp(damageFlash.color, Color.clear, flashSpeed * Time.deltaTime);
         }
-        
         isDamaged = false;
     }
 
-   
-    public void TakeDamage()
+    // [치명적 결함 수정] EnemyAI가 데미지를 던질 수 있도록 매개변수(float amount)를 뚫어놓았습니다.
+    public void TakeDamage(float amount = 1f)
     {
-        if(isDead)
-            return;
+        if(isDead) return;
+        
+        isDamaged = true;
+        Debug.Log($"<color=red>[피격]</color> 플레이어 피격! 체력이 깎입니다.");
+
         foreach (var hpbox in hpBoxes)
         {
-            if (!hpbox.GetIsOn())
-                continue;
+            if (!hpbox.GetIsOn()) continue;
             hpbox.OffHpBox();
             break;
         }
@@ -70,20 +70,49 @@ public class PlayerHealth : MonoBehaviour
     void Die()
     {
         Debug.Log("<color=black>당신은 사망했습니다. 게임 오버.</color>");
-        GameManager.Instance.GameOver();
+        
+    
+        if (GameManager.Instance != null) GameManager.Instance.GameOver(); 
+        
         isDead = true;
     }
-    public void FireAtPointer()
+
+   
+
+    public void OnAttackButtonPressed()
     {
-    
-        if (bulletPrefab != null && muzzle != null)
+        if (isDead) return;
+
+        // 쿨다운 검사: 연속 사격 방지
+        if (Time.time >= lastFireTime + fireRate)
         {
-            Instantiate(bulletPrefab, arCamera.transform.position + arCamera.transform.forward * 0.3f, Quaternion.LookRotation(arCamera.transform.forward));
-            Debug.Log("<color=cyan>[투사체 발사!]</color> 탕!");    
+            ExecuteHitscan();
+            lastFireTime = Time.time;
         }
         else
         {
-            Debug.LogError("총알 프리팹이나 총구(Muzzle) 위치가 인스펙터에 할당되지 않았습니다!");
+            Debug.Log("<color=yellow>[재장전 중]</color> 너무 빨리 쏠 수 없습니다.");
+        }
+    }
+
+    private void ExecuteHitscan()
+    {
+        if (arCamera == null) return;
+
+       
+        Ray ray = arCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+        RaycastHit hit;
+
+        Debug.Log("<color=cyan>[사격]</color> 광선 발사!");
+
+       
+        if (Physics.Raycast(ray, out hit, range))
+        {
+           
+            hit.collider.SendMessage("TakeDamage", attackDamage, SendMessageOptions.DontRequireReceiver);
+            hit.collider.SendMessage("ApplyKnockback", ray.direction, SendMessageOptions.DontRequireReceiver);
+            
+            Debug.Log($"<color=orange>[명중]</color> {hit.collider.name} 타격 성공!");
         }
     }
 }
