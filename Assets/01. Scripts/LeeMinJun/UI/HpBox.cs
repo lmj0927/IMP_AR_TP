@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Turns a child HP indicator on or off and exposes its active state for other systems.
+/// </summary>
 public class HpBox : MonoBehaviour
 {
     [SerializeField] private GameObject onHpBox;

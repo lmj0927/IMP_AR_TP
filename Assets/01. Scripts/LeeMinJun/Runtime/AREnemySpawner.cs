@@ -3,6 +3,9 @@ using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
+/// <summary>
+/// Spawns "one enemy" in front of the camera when the AR image named "Enemy" is added or re-tracked.
+/// </summary>
 public class AREnemySpawner : MonoBehaviour
 {
     private ARTrackedImageManager trackedImgManager;
@@ -26,6 +29,7 @@ public class AREnemySpawner : MonoBehaviour
         trackedImgManager.trackablesChanged.RemoveListener(OnTrackedImagesChanged);
     }
 
+    // if the tracked image is "Enemy" and the enemy is not spawned, spawn the enemy
     void OnTrackedImagesChanged(ARTrackablesChangedEventArgs<ARTrackedImage> args)
     {
         foreach (var trackedImage in args.added)

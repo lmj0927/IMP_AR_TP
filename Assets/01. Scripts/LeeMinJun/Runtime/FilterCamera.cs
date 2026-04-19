@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
+/// <summary>
+/// Toggles a post-process volume and enemy-layer culling while a filter timer drains and refills from pickups.
+/// </summary>
 public class FilterCamera : MonoBehaviour
 {
     [SerializeField] private Button filterButton;
@@ -52,6 +55,7 @@ public class FilterCamera : MonoBehaviour
         filterCoroutine = StartCoroutine(FilterEffectCoroutine());
     }
 
+    // change the filter effect
     IEnumerator FilterEffectCoroutine()
     {
         if (isOnFilter)

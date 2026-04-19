@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Global game flow: triggers game-over UI, tracks stage level, and forwards filter-time boosts to FilterCamera.
+/// </summary>
 public class GameManager : Singleton<GameManager>
 {
     [SerializeField] FilterCamera filterCamera;
