@@ -25,5 +25,5 @@ MonoBehaviour:
       m_GuidHigh: 1536112686445268856
     m_Size: {x: 0.2, y: 0.2}
     m_SpecifySize: 1
-    m_Name: demmonCircle
+    m_Name: Enemy
     m_Texture: {fileID: 0}

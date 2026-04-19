@@ -130,8 +130,8 @@ public class PlayerHealth : MonoBehaviour
                 Instantiate(hitVFX, hit.point, Quaternion.identity);
             }
            
-            hit.collider.SendMessage("TakeDamage", attackDamage, SendMessageOptions.DontRequireReceiver);
-            hit.collider.SendMessage("ApplyKnockback", ray.direction, SendMessageOptions.DontRequireReceiver);
+            //hit.collider.SendMessage("TakeDamage", attackDamage, SendMessageOptions.DontRequireReceiver);
+            //hit.collider.SendMessage("ApplyKnockback", ray.direction, SendMessageOptions.DontRequireReceiver);
             
             Debug.Log($"<color=orange>[명중]</color> {hit.collider.name} 타격 성공!");
         }
