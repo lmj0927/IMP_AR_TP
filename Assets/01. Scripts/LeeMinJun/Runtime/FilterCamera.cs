@@ -80,6 +80,9 @@ public class FilterCamera : MonoBehaviour
     {
         leftFilterTime += increaseAmount;
         if (leftFilterTime > filterTime)
+        {
             leftFilterTime = filterTime;
+        }
+        filterGaugeSlider.value = leftFilterTime;
     }
 }

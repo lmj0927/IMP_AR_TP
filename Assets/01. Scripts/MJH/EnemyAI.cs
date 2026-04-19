@@ -40,6 +40,7 @@ public class EnemyAI : MonoBehaviour
             targetPlayer = playerCamera.GetComponent<PlayerHealth>(); 
         }
         spawnTime = Time.time; 
+        
     }
 
     void Update()

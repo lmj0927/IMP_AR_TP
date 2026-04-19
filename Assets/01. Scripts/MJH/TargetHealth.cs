@@ -17,7 +17,7 @@ public class TargetHealth : MonoBehaviour
     public void TakeDamage(float amount, Vector3 hitDirection)
     {
         currentHealth -= amount;
-        
+        Debug.Log(currentHealth);
         if (enemyAI != null)
         {
             enemyAI.ApplyKnockback(hitDirection);
@@ -31,6 +31,7 @@ public class TargetHealth : MonoBehaviour
 
     void Die()
     {
+        GameManager.Instance.IncreaseStageLevel();
         Destroy(gameObject); 
     }
 }

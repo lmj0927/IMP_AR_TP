@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
@@ -8,6 +7,7 @@ public class AREnemySpawner : MonoBehaviour
 {
     private ARTrackedImageManager trackedImgManager;
     [SerializeField] private List<GameObject> enemyPrefabs;
+    [SerializeField] private GameObject enemySpawnVFX;
 
     private GameObject enemy;
 
@@ -33,7 +33,7 @@ public class AREnemySpawner : MonoBehaviour
             Debug.Log(trackedImage.referenceImage.name);
             if (trackedImage.referenceImage.name == "Enemy")
             {
-                SpawnEnemy();
+                SpawnEnemy(trackedImage);
             }
         }
 
@@ -41,13 +41,18 @@ public class AREnemySpawner : MonoBehaviour
         {
             if (trackedImage.referenceImage.name == "Enemy" && trackedImage.trackingState == TrackingState.Tracking && enemy == null)
             {
-                SpawnEnemy();
+                SpawnEnemy(trackedImage);
             }
         }
     }
 
-    private void SpawnEnemy()
+    private void SpawnEnemy(ARTrackedImage trackedImage)
     {
-        enemy = Instantiate(enemyPrefabs[Mathf.Min(GameManager.Instance.GetStageLevel(), enemyPrefabs.Count - 1 )], Camera.main.transform.position, Quaternion.identity);
+        if (enemy != null) return;
+        Instantiate(enemySpawnVFX, trackedImage.transform.position, trackedImage.transform.rotation);
+        var rand = Random.Range(10f, 20f);
+        var cam = Camera.main;
+        enemy = Instantiate(enemyPrefabs[Mathf.Min(GameManager.Instance.GetStageLevel(), enemyPrefabs.Count - 1 )], cam.transform.position + cam.transform.forward * rand, Quaternion.identity);
+        
     }
 }

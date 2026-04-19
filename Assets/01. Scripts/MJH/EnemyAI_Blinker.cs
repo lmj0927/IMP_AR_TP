@@ -140,7 +140,7 @@ public class EnemyAI_Blinker : MonoBehaviour
             if (Vector3.Distance(orb.transform.position, playerCamera.position) < 0.5f)
             {
                 Debug.Log("<color=red>[피격]</color> 원혼의 구체에 맞았습니다!");
-                if (targetPlayer != null) targetPlayer.TakeDamage(projectileDamage);
+                if (targetPlayer != null) targetPlayer.TakeDamage();
                 Destroy(orb); // 맞으면 구체 소멸
                 yield break; 
             }
