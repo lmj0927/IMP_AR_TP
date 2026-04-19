@@ -2,6 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Mirrors collect readiness from BatteryCollector and routes the click to onAction or offAction.
+/// </summary>
 public class InteractionButton : MonoBehaviour
 {
     private Button button;

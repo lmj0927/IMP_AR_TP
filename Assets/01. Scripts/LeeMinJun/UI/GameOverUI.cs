@@ -3,6 +3,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Shows game-over feedback with a black fade, then enables restart to reload the active scene.
+/// </summary>
 public class GameOverUI : MonoBehaviour
 {
     [SerializeField] private Image fadeImage;

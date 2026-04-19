@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -24,6 +25,8 @@ public class PlayerHealth : MonoBehaviour
     
     private Camera arCamera;
     private bool isDead = false;
+    
+    [SerializeField] private GameObject hitVFX;
 
     void Start()
     {
@@ -35,17 +38,14 @@ public class PlayerHealth : MonoBehaviour
     {
         if (isDamaged)
         {
-            damageFlash.color = flashColor;
+            /*if (damageFlash != null)
+                damageFlash.color = Color.Lerp(damageFlash.color, flashColor, flashSpeed * Time.deltaTime);*/
+            isDamaged = false;
         }
-        else if (damageFlash != null)
-        {
-            damageFlash.color = Color.Lerp(damageFlash.color, Color.clear, flashSpeed * Time.deltaTime);
-        }
-        isDamaged = false;
     }
 
     // [치명적 결함 수정] EnemyAI가 데미지를 던질 수 있도록 매개변수(float amount)를 뚫어놓았습니다.
-    public void TakeDamage(float amount = 1f)
+    public void TakeDamage()
     {
         if(isDead) return;
         
@@ -56,6 +56,7 @@ public class PlayerHealth : MonoBehaviour
         {
             if (!hpbox.GetIsOn()) continue;
             hpbox.OffHpBox();
+            StartCoroutine(FlashFlash());
             break;
         }
 
@@ -65,6 +66,13 @@ public class PlayerHealth : MonoBehaviour
         {
             Die();
         }
+    }
+    
+    IEnumerator FlashFlash()
+    {
+        damageFlash.color = flashColor;
+        yield return new WaitForSeconds(0.1f);
+        damageFlash.color = Color.clear;
     }
 
     void Die()
@@ -108,9 +116,22 @@ public class PlayerHealth : MonoBehaviour
        
         if (Physics.Raycast(ray, out hit, range))
         {
+            
+            // Fix by Minjun
+            if (hit.collider.TryGetComponent<TargetHealth>(out var enemyHealth))
+            {
+                enemyHealth.TakeDamage(attackDamage, ray.direction);
+                Instantiate(hitVFX, hit.point, Quaternion.identity);
+            }
+
+            if (hit.collider.TryGetComponent<TargetHealth_Blinker>(out var enemyBlinkerHealth))
+            {
+                enemyBlinkerHealth.TakeDamage(attackDamage, ray.direction);
+                Instantiate(hitVFX, hit.point, Quaternion.identity);
+            }
            
-            hit.collider.SendMessage("TakeDamage", attackDamage, SendMessageOptions.DontRequireReceiver);
-            hit.collider.SendMessage("ApplyKnockback", ray.direction, SendMessageOptions.DontRequireReceiver);
+            //hit.collider.SendMessage("TakeDamage", attackDamage, SendMessageOptions.DontRequireReceiver);
+            //hit.collider.SendMessage("ApplyKnockback", ray.direction, SendMessageOptions.DontRequireReceiver);
             
             Debug.Log($"<color=orange>[명중]</color> {hit.collider.name} 타격 성공!");
         }

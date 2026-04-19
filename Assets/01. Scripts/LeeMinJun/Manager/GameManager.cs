@@ -1,18 +1,16 @@
 using UnityEngine;
 
+/// <summary>
+/// Global game flow: triggers game-over UI, tracks stage level, and forwards filter-time boosts to FilterCamera.
+/// </summary>
 public class GameManager : Singleton<GameManager>
 {
     [SerializeField] FilterCamera filterCamera;
     [SerializeField] private int stageLevel = 0;
     [SerializeField] private GameOverUI gameOverUI;
-    protected override void Initialize()
-    {
-        base.Initialize();
-    }
 
     public void GameOver()
     {
-        //TODO : 게임오버 로직
         gameOverUI.Show();
     }
 

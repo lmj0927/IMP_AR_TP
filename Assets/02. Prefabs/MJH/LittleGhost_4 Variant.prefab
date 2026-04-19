@@ -8,6 +8,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 822559404169317647, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2086675556445053424, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2198390381631141048, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2973895510316960705, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256102398597167541, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 3354274617867758729, guid: 599519992bda7c14399432c05b55666c, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -15,6 +35,22 @@ PrefabInstance:
     - target: {fileID: 3354274617867758729, guid: 599519992bda7c14399432c05b55666c, type: 3}
       propertyPath: dodgeSpeed
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3462061142968933367, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3639830093453250557, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3831964537345122062, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4196089986716354876, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4633865039284259092, guid: 599519992bda7c14399432c05b55666c, type: 3}
       propertyPath: m_LocalScale.x
@@ -80,9 +116,29 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 1.065
       objectReference: {fileID: 0}
+    - target: {fileID: 5987366241894125017, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 6180285084413637326, guid: 599519992bda7c14399432c05b55666c, type: 3}
       propertyPath: m_Name
       value: LittleGhost_4 Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 6180285084413637326, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6218900775686417162, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8043694225656758566, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8074601201095380882, guid: 599519992bda7c14399432c05b55666c, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -130,7 +186,7 @@ MonoBehaviour:
   chaseSpeed: 1
   floatSpeed: 0.1
   floatHeight: 0.3
-  attackCooldown: 2
+  attackCooldown: 5
   dodgeSpeed: 1
   dodgeInterval: 1.5
   knockbackForce: 2

@@ -33,6 +33,7 @@ public class TargetHealth_Blinker : MonoBehaviour
 
     void Die()
     {
+        GameManager.Instance.IncreaseStageLevel();
         Debug.Log("<color=black>[점멸자 소멸]</color> 적을 처치했습니다!");
         Destroy(gameObject); 
     }
