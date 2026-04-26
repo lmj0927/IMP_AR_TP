@@ -18,6 +18,7 @@ public class TargetHealth : MonoBehaviour
     {
         currentHealth -= amount;
         Debug.Log(currentHealth);
+        
         if (enemyAI != null)
         {
             enemyAI.ApplyKnockback(hitDirection);
@@ -31,6 +32,7 @@ public class TargetHealth : MonoBehaviour
 
     void Die()
     {
+        AudioManager.Instance.PlaySound(SoundType.EnemyDie);
         GameManager.Instance.IncreaseStageLevel();
         Destroy(gameObject); 
     }

@@ -54,6 +54,7 @@ public class AREnemySpawner : MonoBehaviour
     {
         if (enemy != null) return;
         Instantiate(enemySpawnVFX, trackedImage.transform);
+        AudioManager.Instance.PlaySound(SoundType.EnemySpawn);
         var rand = Random.Range(10f, 20f);
         var cam = Camera.main;
         enemy = Instantiate(enemyPrefabs[Mathf.Min(GameManager.Instance.GetStageLevel(), enemyPrefabs.Count - 1 )], cam.transform.position + cam.transform.forward * rand, Quaternion.identity);
