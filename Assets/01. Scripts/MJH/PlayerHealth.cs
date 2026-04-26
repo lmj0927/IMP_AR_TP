@@ -51,6 +51,7 @@ public class PlayerHealth : MonoBehaviour
         
         isDamaged = true;
         Debug.Log($"<color=red>[피격]</color> 플레이어 피격! 체력이 깎입니다.");
+        AudioManager.Instance.PlaySound(SoundType.PlayerHit);
 
         foreach (var hpbox in hpBoxes)
         {
@@ -135,5 +136,7 @@ public class PlayerHealth : MonoBehaviour
             
             Debug.Log($"<color=orange>[명중]</color> {hit.collider.name} 타격 성공!");
         }
+        
+        AudioManager.Instance.PlaySound(SoundType.Shoot);
     }
 }
