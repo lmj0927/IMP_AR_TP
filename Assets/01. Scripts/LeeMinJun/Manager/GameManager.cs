@@ -11,7 +11,7 @@ public class GameManager : Singleton<GameManager>
 
     public void GameOver()
     {
-        gameOverUI.Show();
+        gameOverUI.Show(true);
     }
 
     public int GetStageLevel()
@@ -22,6 +22,10 @@ public class GameManager : Singleton<GameManager>
     public void IncreaseStageLevel()
     {
         stageLevel++;
+        if (stageLevel >= 2)
+        {
+            gameOverUI.Show(false);
+        }
     }
     
     public void IncreaseLeftFilterTime(float increaseAmount)

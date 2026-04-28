@@ -3573,6 +3573,7 @@ MonoBehaviour:
   fadeImage: {fileID: 1432799714}
   gameOverText: {fileID: 10978243}
   restartButton: {fileID: 1585843303}
+  endText: {fileID: 10978245}
   fadeDuration: 3
 --- !u!1 &1794093510
 GameObject:

@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 /// <summary>
 /// Shows game-over feedback with a black fade, then enables restart to reload the active scene.
@@ -11,19 +12,21 @@ public class GameOverUI : MonoBehaviour
     [SerializeField] private Image fadeImage;
     [SerializeField] private GameObject gameOverText;
     [SerializeField] private Button restartButton;
+    [SerializeField] private TMP_Text endText;
     [SerializeField] private float fadeDuration = 1f;
 
     void Awake()
     {
         restartButton.onClick.AddListener(OnRestartButtonClicked);
     }
-    public void Show()
+    public void Show(bool isGameOver)
     {
-        StartCoroutine(GameOver());
+        StartCoroutine(GameOver(isGameOver));
     }
 
-    IEnumerator GameOver()
+    IEnumerator GameOver(bool isGameOver)
     {
+        endText.text = isGameOver ? "Game Over" : "Game Clear";
         fadeImage.gameObject.SetActive(true);
         var timer = 0f;
         while (timer < fadeDuration)
